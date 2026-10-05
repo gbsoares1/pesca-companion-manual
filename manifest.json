@@ -1,0 +1,73 @@
+{
+  "manifest_version": 3,
+  "name": "Pesca Companion Manual",
+  "version": "2.8.43",
+  "description": "Pesca por clique, inventário, expedições e planejamento local.",
+  "permissions": [
+    "storage",
+    "scripting",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://www.twitch.tv/*",
+    "https://twish.com.br/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://twish.com.br/c/*"
+      ],
+      "js": [
+        "boat-tracker.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://twish.com.br/c/*/*/inventory"
+      ],
+      "js": [
+        "site-data.js",
+        "core.js",
+        "reader.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://www.twitch.tv/*"
+      ],
+      "js": [
+        "replies.js",
+        "twitch.js",
+        "fish-details.js",
+        "expeditions.js",
+        "goals.js",
+        "panel-template.js",
+        "panel-inventory.js",
+        "panel-progress.js",
+        "panel.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://twish.com.br/c/*/shop",
+        "https://twish.com.br/c/*/ranking",
+        "https://twish.com.br/c/*/tournament",
+        "https://twish.com.br/c/*/expedicoes"
+      ],
+      "js": [
+        "site-data.js",
+        "expeditions.js",
+        "page-reader.js"
+      ]
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

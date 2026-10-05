@@ -1,0 +1,11 @@
+const projectRoot=require('path').resolve(__dirname,'..')+'/';
+const vm=require('vm'),fs=require('fs'),assert=require('assert/strict');let handler,clicks=0;
+const input={innerText:'$hoje',getClientRects:()=>[{}]},button={disabled:false,getAttribute:()=>null,getClientRects:()=>[{}],getBoundingClientRect:()=>({left:10,top:10,width:20,height:20}),contains:e=>e===button,click:()=>{clicks++;input.innerText='';}};
+const doc={querySelectorAll:s=>s.includes('chat-send-button')?[button]:s.includes('chat-input')?[input]:[],querySelector:()=>null,elementFromPoint:()=>button};
+vm.runInNewContext(fs.readFileSync(projectRoot+'twitch.js','utf8'),{chrome:{runtime:{id:'test',onMessage:{addListener:f=>handler=f}}},document:doc,location:{pathname:'/popout/faturetosl/chat'},navigator:{onLine:true}});
+const send=m=>{let result;handler(m,{id:'test'},r=>result=r);return result;};
+assert.equal(send({type:'submitNative',command:'$hoje'}).clicked,true);assert.equal(clicks,1);assert.equal(send({type:'nativeStatus',command:'$hoje'}).cleared,true);
+assert(send({type:'submitNative',command:'$hoje'}).error);assert.equal(clicks,1);
+input.innerText='rascunho pessoal';assert(send({type:'submitNative',command:'$hoje'}).error);assert.equal(input.innerText,'rascunho pessoal');assert.equal(clicks,1);
+input.innerText='$hoje';button.disabled=true;assert(send({type:'submitNative',command:'$hoje'}).error);assert.equal(send({type:'nativeStatus',command:'$hoje'}).cleared,false);assert.equal(clicks,1);
+console.log('Envio: botão oficial, campo limpo, nenhum segundo clique, rascunho preservado e botão indisponível bloqueado.');
