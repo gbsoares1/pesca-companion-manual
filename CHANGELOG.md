@@ -1,5 +1,15 @@
 # Histórico de versões
 
+## 2.8.44
+
+- Tutorial de instalação com voz em português, legendas e capturas reais do GitHub, Chrome e painel, acessível pelo README e guia de instalação.
+
+- Leitura de captura aguarda mensagem completa, reconhece mandi/lula e ignora resumo do dia ou respostas anteriores ao comando atual.
+- Falta de confirmação deixa de ser exibida como pesca sem captura.
+- Monitor preserva conta e barco enquanto ligado; troca de contexto requer pausa.
+- Contador ausente em sessão identificada não é tratado automaticamente como falta de login.
+- Novos testes de mensagens parciais, resposta imediata, ausência de confirmação e isolamento de abas.
+
 ## 2.8.43
 
 - Créditos do produto e da documentação para @MadtraxBR, com link da Twitch.

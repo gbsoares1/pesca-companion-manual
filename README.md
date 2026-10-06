@@ -2,13 +2,21 @@
 
 ![Ícone do Pesca Companion](icons/icon128.png)
 
-**Versão 2.8.43 · extensão para Google Chrome · interface em português**
+**Versão 2.8.44 · extensão para Google Chrome · interface em português**
 
 **Créditos: [@MadtraxBR](https://www.twitch.tv/madtraxbr)**
 
 Acompanhe a pesca da Twish enquanto assiste à Twitch: cooldown, equipamentos, inventário, marés e uma meta de compra, reunidos em um painel que pode ser movido e minimizado.
 
 **Cada pesca exige um clique em Pescar.** O interruptor verde ativa o acompanhamento dos dados; ele não inicia pescas por conta própria.
+
+## Tutorial em vídeo
+
+[![Assistir ao tutorial narrado de instalação no Chrome](docs/imagens/tutorial-chrome.png)](https://github.com/gbsoares1/pesca-companion-manual/blob/main/docs/videos/tutorial-chrome.mp4)
+
+**[Assistir ou baixar o tutorial em português](https://github.com/gbsoares1/pesca-companion-manual/blob/main/docs/videos/tutorial-chrome.mp4)** · 1 minuto e 48 segundos · com voz e legendas.
+
+O vídeo mostra onde baixar o ZIP na release, as telas reais do Chrome para carregar a extensão, a ativação do monitor e a configuração da meta. Capturas do painel foram recortadas para remover a identificação. As etapas de extração, identificação da conta e troca de barco usam explicações ilustrativas. A release exibida é um exemplo; baixe a versão mais recente disponível.
 
 ## Tela de Status
 
@@ -27,7 +35,7 @@ O Status reúne saldos, valor disponível no inventário, meta, revenda da vara 
 | [Configurar progresso e metas](docs/PROGRESSO-E-METAS.md) | Selecionar varas e itens, moedas, salvar a meta, desconto e revenda |
 | [Resolver problemas](docs/SOLUCAO-DE-PROBLEMAS.md) | Painel ausente, conexão, catálogo, inventário, envio e marés |
 | [Arquitetura e contribuição](docs/ARQUITETURA.md) | Organização do código, fluxo dos dados e testes locais |
-| [Histórico de versões](CHANGELOG.md) | Correções da série manual 2.8.39–2.8.43 |
+| [Histórico de versões](CHANGELOG.md) | Correções da série manual 2.8.39–2.8.44 |
 
 ## Instalação rápida
 
@@ -55,7 +63,7 @@ Esse método de instalação local segue o [guia oficial de extensões do Chrome
 | Progresso | Meta de compra, saldo da moeda escolhida, valor que falta, resumo do dia e XP |
 | Catálogo de metas | Varas, artigos de pesca e cosméticos com preço legível, inclusive pérolas e opções de escamas |
 | Painel móvel | Arrastar pelo cabeçalho, minimizar, expandir e usar durante tela cheia |
-| Contexto por conta e barco | Dados e metas locais separados; mudança de barco feita pela aba normal da Twish |
+| Contexto por conta e barco | Dados e metas locais separados; mudança de barco feita pela aba normal da Twish com o monitor pausado |
 
 As abas disponíveis são Status, Pesca, Inventário, Expedições e Progresso. O resumo **Hoje** fica em Progresso; saldos e a visão rápida da meta ficam em Status.
 

@@ -2,6 +2,12 @@
 
 [Voltar ao início](../README.md)
 
+## Tutorial narrado
+
+[![Tutorial de instalação no Chrome](imagens/tutorial-chrome.png)](https://github.com/gbsoares1/pesca-companion-manual/blob/main/docs/videos/tutorial-chrome.mp4)
+
+[Assistir ou baixar o vídeo em português](https://github.com/gbsoares1/pesca-companion-manual/blob/main/docs/videos/tutorial-chrome.mp4). Duração: **1 minuto e 48 segundos**, com voz, legendas e capturas reais do GitHub, Chrome e painel. Os detalhes ilustrativos complementam as capturas; a versão exibida na release é um exemplo.
+
 ## Antes de começar
 
 Você precisa do Google Chrome, de acesso à Internet e de sessões conectadas na Twitch e na Twish. Abra o inventário da sua própria conta no barco que deseja acompanhar. O usuário identificado no cabeçalho deve corresponder ao inventário usado pela extensão.
@@ -10,7 +16,7 @@ A distribuição documentada aqui é uma **extensão local sem compactação**. 
 
 ## 1. Obter o projeto
 
-Baixe o pacote ZIP fornecido e extraia o arquivo. Se houver uma pasta externa, entre nela até encontrar `manifest.json`.
+Abra a [release mais recente](https://github.com/gbsoares1/pesca-companion-manual/releases/latest), baixe **pesca-companion-manual.zip** em **Assets** e extraia o arquivo. Se houver uma pasta externa, entre nela até encontrar `manifest.json`.
 
 Não é preciso executar `npm install` ou outro preparo para a instalação.
 
@@ -24,7 +30,7 @@ Mantenha essa pasta em um local permanente. O Chrome continuará usando seus arq
 2. Ative **Modo do desenvolvedor**, normalmente no canto superior direito.
 3. Clique em **Carregar sem compactação**.
 4. Selecione a pasta que contém `manifest.json`, `background.js` e os demais arquivos da extensão.
-5. Confira o cartão **Pesca Companion Manual**, versão **2.8.43**, e deixe-o ativado.
+5. Confira o cartão **Pesca Companion Manual**, versão **2.8.44**, e deixe-o ativado.
 
 Não selecione o ZIP. Se o Chrome disser que não encontrou o manifesto, provavelmente foi selecionada a pasta externa ou uma subpasta como `docs` ou `icons`.
 
@@ -61,7 +67,7 @@ Quando a leitura estiver recente e o cooldown chegar a zero, o painel mostrará 
 1. Confira a conta e o barco.
 2. Clique uma vez em **Pescar**.
 3. Aguarde a resposta no bloco superior do painel.
-4. Se houver captura, veja o nome do peixe; outras respostas podem indicar que não foi desta vez ou apresentar um problema de envio.
+4. Se houver captura, veja o nome do peixe; uma falha reconhecida indica que não foi desta vez. Ausência de resposta confirmada e problemas de envio aparecem separadamente.
 
 A edição manual não pesca por temporizador nem confirma pesca automaticamente depois de alguns segundos. Cada envio exige seu clique.
 
@@ -77,7 +83,7 @@ Arraste pelo cabeçalho para reposicionar. A posição compacta e a expandida s�
 
 ## Trocar de barco
 
-Abra o inventário do novo barco em uma aba normal da Twish e deixe essa aba ativa. Confira a mudança no cabeçalho da Twitch antes de executar uma ação.
+Pause o monitor pelo interruptor. Abra o inventário do novo barco em uma aba normal da Twish e deixe essa aba ativa. Depois ligue o monitor novamente. Confira a mudança no cabeçalho da Twitch antes de executar uma ação.
 
 A extensão reutiliza suas abas de referência para o novo contexto. Os dados e a meta do barco anterior continuam separados no armazenamento local. Ao voltar a ele, a meta correspondente pode ser recuperada.
 

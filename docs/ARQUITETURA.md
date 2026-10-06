@@ -56,14 +56,14 @@ boat:<barco>:<usuario>:<tipo_de_dado>
 
 O estado do monitor e a posição do painel também são locais. Mudanças em `chrome.storage.local` são observadas pelas abas. Isso não equivale a sincronização remota.
 
-As referências próprias usam identificadores de abas e registros de sessão/local para evitar criar novas abas em cada ação. A navegação pessoal ativa na Twish pode trocar o contexto; as abas próprias não devem definir essa troca como se fossem navegação pessoal.
+As referências próprias usam identificadores de abas e registros de sessão/local para evitar criar novas abas em cada ação. A navegação pessoal ativa na Twish pode trocar o contexto apenas com o monitor pausado; as abas próprias não devem definir essa troca como se fossem navegação pessoal.
 
 ## Cache e atualização
 
 - Inventário pode solicitar leitura renovada ao abrir a aba e acompanhar notificações do armazenamento.
 - Loja considera dia, situação de desconto e versão do catálogo; Atualizar loja força a consulta.
 - Expedições consideram barco/conta, vara equipada e dia.
-- Mudanças de contexto descartam os dados apresentados do contexto anterior e recuperam os correspondentes.
+- Com o monitor ligado, conta e barco ficam preservados. Pause antes de selecionar outro contexto pela Twish; a mudança descarta os dados apresentados do contexto anterior e recupera os correspondentes.
 - A seleção provisória de item não troca o resumo da meta até Salvar meta.
 
 Os seletores DOM são contratos com os sites. Por exemplo, a loja tem cartões `.shop-item` e `.shop-hanger`, e um cartão pode oferecer mais de uma `.shop-tag` com moedas distintas. O leitor numérico deve usar o valor do preço e excluir o selo percentual de desconto.
@@ -92,6 +92,8 @@ O verificador testa a sintaxe dos JavaScript da extensão e executa:
 | `restoration.cjs` | Maré no Status, destino sem nota, meta salva, seleção provisória, opção de pérolas e fim do desconto |
 | `chat-submit.cjs` | Clique oficial único, campo limpo, rascunho preservado e botão indisponível |
 | `inventory.cjs` | Peixes separados de equipamentos, quantidade, imagem e venda direta |
+| `fish-response.cjs` | Texto parcial, resposta anterior, resumo, mandi/lula, outra conta e timeout |
+| `owned-tabs.cjs` | Abas próprias fixas, contexto preservado, captura publicada imediatamente e ausência de confirmação |
 
 Esses testes são verificações locais com fixtures. Não fazem login, não enviam mensagens e não compram/vendem itens. Não constituem validação de ponta a ponta nos sites reais.
 

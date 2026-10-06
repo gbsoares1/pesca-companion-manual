@@ -100,6 +100,7 @@ if(m.type==='selectBoat'){
  const tab=await chrome.tabs.get(sender.tab.id);const detected={...(contextFromTwish(tab.url)||{}),...(m.context||{})};const nextBoat=detected.boat||boat;const nextUser=normalizeUser(detected.user)??user;
  const {companionOwnedMonitorTab:owned}=await chrome.storage.session.get('companionOwnedMonitorTab');
  const {companionOwnedChatTab:chat}=await chrome.storage.session.get('companionOwnedChatTab');if(!nextBoat||!tab.active||sender.tab.id===owned||sender.tab.id===chat){reply({ok:false});return;}
+ if(s.enabled&&user&&(nextBoat!==boat||nextUser!==user)){reply({ok:false,contextLocked:true,boat,user});return;}
  if(nextBoat!==boat||nextUser!==user){s={...s,enabled:!!s.enabled,boat:nextBoat,user:nextUser,monitorTabId:s.monitorTabId,seconds:null,used:false,at:0};setContext({boat:nextBoat,user:nextUser});await chrome.storage.local.set({fishState:s});if(s.enabled&&user)await ensureMonitor(true);}
  reply({ok:true,boat,user});return;
 }
@@ -234,7 +235,7 @@ const result=await sendNative(tab.id);
 if(!result.attempted||result.retry)await chrome.tabs.sendMessage(tab.id,{type:'cancelFish'});
 const catchResult=await response;
 await chrome.tabs.sendMessage(tab.id,{type:'cancelFish'});
-if(!catchResult)s.catchResult={...(result.sent?{caught:false}:{error:true,message:result.message}),at:Date.now(),expiresAt:Date.now()+8000};
+if(!catchResult)s.catchResult={...(result.sent?{error:true,message:'Não foi possível confirmar o resultado da pesca. Confira o chat; nenhum reenvio foi feito.'}:{error:true,message:result.message}),at:Date.now(),expiresAt:Date.now()+8000};
 s.result=null;if(!catchResult&&(result.attempted===false||result.retry===true))s.used=false;
 }catch(e){s.result=e.message||'Resultado desconhecido. Confira o chat.';s.catchResult={error:true,message:s.result,at:Date.now(),expiresAt:Date.now()+8000};s.result=null;s.used=false;}
 await save();

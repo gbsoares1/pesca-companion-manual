@@ -22,7 +22,7 @@ Essa região acompanha as abas e reúne:
 
 A leitura do cooldown precisa estar recente, o monitor precisa estar ligado e não pode haver erro ou outra tentativa em andamento. Existe uma proteção de pelo menos 15 segundos entre tentativas de pesca, que não substitui o cooldown do jogo.
 
-Quando há resposta reconhecida, a captura apresenta o peixe. Uma resposta sem captura apresenta **Não foi desta vez pescador.** Falhas de transporte, conta, verificação ou envio podem mostrar uma mensagem específica. O resultado de captura permanece visível por **8 segundos**. A espera por uma resposta do bot é limitada; a ausência de resposta não provoca reenvio automático.
+Quando há resposta reconhecida, a captura apresenta o peixe. Uma resposta reconhecida de falha apresenta **Não foi desta vez pescador.** Mensagens parciais, resumos do dia e respostas anteriores ao comando atual são ignorados. Se o resultado não puder ser confirmado, o painel informa essa condição, sem inventar uma pesca perdida. Falhas de transporte, conta, verificação ou envio podem mostrar uma mensagem específica. O resultado de captura permanece visível por **8 segundos**. A espera por uma resposta do bot é limitada; a ausência de resposta não provoca reenvio automático.
 
 ## Status
 

@@ -1,4 +1,4 @@
-# Pesca Companion Manual 2.8.43
+# Pesca Companion Manual 2.8.44
 
 O guia completo do projeto está em [README.md](README.md).
 
