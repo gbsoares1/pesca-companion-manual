@@ -12,9 +12,9 @@ Acompanhe a pesca da Twish enquanto assiste à Twitch: cooldown, equipamentos, i
 
 ## Tutorial em vídeo
 
-[![Assistir ao tutorial narrado de instalação no Chrome](docs/imagens/tutorial-chrome.png)](https://github.com/gbsoares1/pesca-companion-manual/blob/main/docs/videos/tutorial-chrome.mp4)
+[![Assistir ao tutorial narrado de instalação no Chrome](docs/imagens/tutorial-chrome.png)](https://github.com/gbsoares1/pesca-companion-manual/releases/tag/v2.8.44#tutorial-de-instalação)
 
-**[Assistir ou baixar o tutorial em português](https://github.com/gbsoares1/pesca-companion-manual/blob/main/docs/videos/tutorial-chrome.mp4)** · 1 minuto e 48 segundos · com voz e legendas.
+**[Assistir ou baixar o tutorial em português](https://github.com/gbsoares1/pesca-companion-manual/releases/tag/v2.8.44#tutorial-de-instalação)** · 1 minuto e 48 segundos · com voz e legendas.
 
 O vídeo mostra onde baixar o ZIP na release, as telas reais do Chrome para carregar a extensão, a ativação do monitor e a configuração da meta. Capturas do painel foram recortadas para remover a identificação. As etapas de extração, identificação da conta e troca de barco usam explicações ilustrativas. A release exibida é um exemplo; baixe a versão mais recente disponível.
 
