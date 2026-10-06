@@ -4,9 +4,9 @@
 
 ## Tutorial narrado
 
-[![Tutorial de instalação no Chrome](imagens/tutorial-chrome.png)](https://github.com/gbsoares1/pesca-companion-manual/blob/main/docs/videos/tutorial-chrome.mp4)
+[![Tutorial de instalação no Chrome](imagens/tutorial-chrome.png)](https://github.com/gbsoares1/pesca-companion-manual/releases/tag/v2.8.44#tutorial-de-instalação)
 
-[Assistir ou baixar o vídeo em português](https://github.com/gbsoares1/pesca-companion-manual/blob/main/docs/videos/tutorial-chrome.mp4). Duração: **1 minuto e 48 segundos**, com voz, legendas e capturas reais do GitHub, Chrome e painel. Os detalhes ilustrativos complementam as capturas; a versão exibida na release é um exemplo.
+[Assistir ou baixar o vídeo em português](https://github.com/gbsoares1/pesca-companion-manual/releases/tag/v2.8.44#tutorial-de-instalação). Duração: **1 minuto e 48 segundos**, com voz, legendas e capturas reais do GitHub, Chrome e painel. Os detalhes ilustrativos complementam as capturas; a versão exibida na release é um exemplo.
 
 ## Antes de começar
 
