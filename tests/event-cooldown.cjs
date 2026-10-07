@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
+const source=fs.readFileSync(path.join(__dirname,'../background.js'),'utf8');
+const fn=source.slice(source.indexOf('function needsEventCooldownRefresh'),source.indexOf('const TEST_SEND='));const ctx={Date,Number};vm.createContext(ctx);vm.runInContext(fn,ctx);
+const event={text:'⚡ Maré Turbo! Cooldown de $pescar reduzido pra 50% (todo mundo já foi resetado)',seconds:532};const now=1000000;
+assert.equal(ctx.needsEventCooldownRefresh({},event,now),true);
+const state={cooldownResetEvent:{text:event.text,until:now+event.seconds*1000+30000}};
+assert.equal(ctx.needsEventCooldownRefresh(state,{...event,seconds:531},now+1000),false,'Não recarrega a cada segundo');
+assert.equal(ctx.needsEventCooldownRefresh(state,event,state.cooldownResetEvent.until+1),true,'Outra ocorrência pode consultar novamente');
+for(const value of [null,{...event,seconds:0},{...event,seconds:null},{text:'Desconto na loja',seconds:600}])assert.equal(ctx.needsEventCooldownRefresh({},value,now),false);
+assert.match(source,/await save\(\);if\(refreshResetCooldown&&s.monitorTabId!==undefined\)/,'Marca o evento antes de recarregar');
+console.log('Maré Turbo: consulta de cooldown uma vez por evento, persistência e eventos sem reset ignorados.');
