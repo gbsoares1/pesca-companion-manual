@@ -2,7 +2,7 @@
 
 ![Ícone do Pesca Companion](icons/icon128.png)
 
-**Versão 2.8.47 · extensão para Google Chrome · interface em português**
+**Versão 2.8.61 · extensão para Google Chrome · interface em português**
 
 **Créditos: [@MadtraxBR](https://www.twitch.tv/madtraxbr)**
 
@@ -97,3 +97,13 @@ As páginas oficiais definem os preços finais, os requisitos, o saldo e a dispo
 ## Créditos
 
 Criação, desenvolvimento e documentação: **[@MadtraxBR](https://www.twitch.tv/madtraxbr)**.
+
+## Usar em outro monitor
+
+Clique em **↗ Abrir em janela separada** no cabeçalho do painel, ou no ícone da extensão na barra do Chrome. Arraste a janela pela barra de título para o monitor desejado; a live pode continuar em outro monitor.
+
+A janela mantém Status, Pesca manual, Inventário, Expedições e Progresso, incluindo o resumo Hoje e a taxa de sucesso. Os dados e as ações usam as abas exclusivas do produto. Abrir novamente traz a janela existente para frente.
+
+Enquanto a janela estiver aberta, o painel embutido fica oculto. Fechar a janela restaura o painel na Twitch e mantém o monitor ligado. Para desligar e fechar as abas exclusivas, use o botão de ativar/desativar do painel.
+
+O resultado da última pesca permanece visível até iniciar a próxima tentativa, inclusive na janela separada. Capturas mostram o peixe; demais resultados mostram **Não foi desta vez pescador**.

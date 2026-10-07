@@ -1,13 +1,14 @@
 (()=>{
 'use strict';
-if(location.hostname!=='www.twitch.tv')return;
+const standalone=location.protocol==='chrome-extension:'&&location.pathname==='/panel-window.html';
+if(!standalone&&location.hostname!=='www.twitch.tv')return;
 // A aba dedicada ao chat fica livre do painel para não cobrir o editor.
 if(location.hostname==='www.twitch.tv'&&/^\/popout\/[a-z0-9_]+\/chat\/?$/i.test(location.pathname))return;
 if(document.getElementById('companion-panel'))return;
 const TEST_SEND=false; // Versão definitiva: exige cooldown disponível.
-const {host,root}=CompanionPanelTemplate.createPanelHost();
+const {host,root}=CompanionPanelTemplate.createPanelHost(standalone);
 document.documentElement.append(host);
-const $=s=>root.querySelector(s);let state={},sending=false,displayedCatch=null,catchVisibleUntil=0;let expeditionData=null,expeditionBusy=false,expeditionAttemptAt=0,expeditionAttemptRod=null,expeditionMarkup='';
+const $=s=>root.querySelector(s);let state={},sending=false;let expeditionData=null,expeditionBusy=false,expeditionAttemptAt=0,expeditionAttemptRod=null,expeditionMarkup='';
 let invalid=false;
 async function extensionCall(fn){
  try{if(!chrome.runtime.id)throw Error('Extension context invalidated');return await fn();}
@@ -15,7 +16,7 @@ async function extensionCall(fn){
 }
 
 function renderEvent(){const box=$('.event-data');if(!box)return;const event=state.event;box.replaceChildren();const text=document.createElement('div');text.textContent=event?.text||'Nenhum evento ativo no barco.';box.append(text);if(event&&Number.isFinite(event.seconds)){const time=document.createElement('p');time.style.margin='10px 0 0';time.style.fontVariantNumeric='tabular-nums';time.textContent=(state.enabled&&Date.now()-(event.at||0)<5000?'Tempo restante: ':'Último tempo lido: ')+Math.floor(event.seconds/60)+':'+String(event.seconds%60).padStart(2,'0');box.append(time);}}
-function render(){renderTodayOverview();renderHomeOverview();renderStatusGoal();updateGoalNotice();if(workspace?.querySelector('.goal-overview'))workspace.querySelector('.balance')?.dispatchEvent(new Event('input'));updateExpeditions();$('.account').textContent=(state.user?'@'+state.user:'Conta pendente')+' · '+(state.boat||'faturetosl');renderEvent();const result=state.catchResult;const awaitingCatch=sending&&!result;if(result?.at&&result.at!==displayedCatch&&Date.now()-result.at<15000){displayedCatch=result.at;catchVisibleUntil=Date.now()+8000;}const notice=$('.catch-notice');if(notice){notice.hidden=!result||Date.now()>=catchVisibleUntil;if(!notice.hidden)notice.innerHTML=result.error?`<span>${esc(result.message||'Não foi possível pescar. Confira o chat.')}</span>`:result.caught?(result.image?`<img src="${result.image.replace(/"/g,'')}" alt="">`:'')+`<span>${String(result.name).replace(/[&<>]/g,'')} pescado!</span>`:'Não foi desta vez pescador.';}const fresh=Date.now()-(state.at||0)<5000;const ready=TEST_SEND?!sending&&Date.now()-(state.lastAttempt||0)>=15000:state.enabled&&fresh&&state.seconds===0&&!state.used&&!state.error&&!sending&&Date.now()-(state.lastAttempt||0)>=15000;
+function render(){renderTodayOverview();renderHomeOverview();renderStatusGoal();updateGoalNotice();if(workspace?.querySelector('.goal-overview'))workspace.querySelector('.balance')?.dispatchEvent(new Event('input'));updateExpeditions();$('.account').textContent=(state.user?'@'+state.user:'Conta pendente')+' · '+(state.boat||'faturetosl');renderEvent();const result=state.catchResult;const awaitingCatch=sending&&!result;const notice=$('.catch-notice');if(notice){notice.hidden=!result;if(!notice.hidden)notice.innerHTML=result.caught?(result.image?`<img src="${result.image.replace(/"/g,'')}" alt="">`:'')+`<span>${esc(result.name)} pescado!${result.featured?'<br><strong>🎯 Peixe em destaque!</strong>':''}${result.bonus?'<br>+'+esc(result.bonus)+' twishcoins de bônus':''}</span>`:'Não foi desta vez pescador.';}const fresh=Date.now()-(state.at||0)<5000;const ready=TEST_SEND?!sending&&Date.now()-(state.lastAttempt||0)>=15000:state.enabled&&fresh&&state.seconds===0&&!state.used&&!state.error&&!sending&&Date.now()-(state.lastAttempt||0)>=15000;
 $('.switch').setAttribute('aria-checked',String(!!state.enabled));
 $('.time').textContent=awaitingCatch?'Aguardando resposta':!state.enabled?'Pausado':!fresh&&!sending?'Conectando…':state.seconds===0?'Disponível':state.seconds===null?'Atenção':`${Math.floor(state.seconds/60)}:${String(state.seconds%60).padStart(2,'0')}`;
 $('.status').textContent=(awaitingCatch?'Aguardando resposta da pesca.':null)||state.result||(TEST_SEND?'Modo de teste: cooldown não bloqueia o envio.':null)||(!state.enabled?'Ligue para acompanhar o cooldown.':!fresh?(state.monitorError||'Abra o inventário fixo e confira se o contador aparece.'):state.error|| (state.used?'Aguardando uma nova pesca.':'Atualizado a cada segundo.'));
@@ -24,9 +25,12 @@ $('.fish').disabled=!ready;$('.fish').classList.toggle('waiting',!!state.enabled
 extensionCall(()=>chrome.storage.local.get('fishState')).then(s=>{if(!invalid)state=s.fishState||{};render();restoreBoat();});
 chrome.storage.onChanged.addListener((changes,area)=>{if(area==='local'&&changes.fishState){const previousBoat=state.boat||'faturetosl',previousUser=state.user||null;state=changes.fishState.newValue||{};render();if(previousBoat!==(state.boat||'faturetosl')||previousUser!==(state.user||null))restoreBoat();}});
 $('.switch').onclick=()=>extensionCall(()=>chrome.runtime.sendMessage({type:'toggle',enabled:!state.enabled}));
-const layoutKey='companionLayoutTwitch';
+$('.detach').onclick=()=>extensionCall(()=>chrome.runtime.sendMessage({type:'openPanelWindow'}));
+if(!standalone){const showEmbedded=value=>{if(value)host.style.setProperty('display','none','important');else host.style.removeProperty('display');};extensionCall(()=>chrome.storage.local.get('companionDetachedOpen')).then(v=>showEmbedded(v.companionDetachedOpen));chrome.storage.onChanged.addListener((changes,area)=>{if(area==='local'&&changes.companionDetachedOpen)showEmbedded(changes.companionDetachedOpen.newValue);});}
+const layoutKey=standalone?'companionLayoutWindow':'companionLayoutTwitch';
 let layout={mini:false},drag=null,displayedMini=false;
 function place(x,y){
+ if(standalone)return;
  const r=root.querySelector('section').getBoundingClientRect();
  layout.x=Math.max(8,Math.min(x,Math.max(8,window.innerWidth-r.width-8)));
  layout.y=Math.max(8,Math.min(y,Math.max(8,window.innerHeight-(layout.mini?56:80))));
@@ -34,6 +38,7 @@ function place(x,y){
  for(const [key,value] of Object.entries({position:'fixed',right:'auto',bottom:'auto',left:layout.x+'px',top:layout.y+'px',margin:'0',transform:'none'}))host.style.setProperty(key,value,'important');
 }
 function applyLayout(){
+ if(standalone){layout.mini=false;render();return;}
  if(displayedMini!==!!layout.mini){const previous=root.querySelector('section').getBoundingClientRect();layout.positions=layout.positions||{};layout.positions[displayedMini?'mini':'expanded']={x:previous.left,y:previous.top};const next=layout.positions[layout.mini?'mini':'expanded'];if(next){layout.x=next.x;layout.y=next.y;}else{layout.x=previous.left;layout.y=previous.top;}displayedMini=!!layout.mini;root.querySelector('section').scrollTop=0;}
  host.classList.toggle('mini',!!layout.mini);
  $('.collapse').textContent=layout.mini?'+':'−';
@@ -50,7 +55,7 @@ host.addEventListener('contextmenu',e=>{if(!layout.mini)return;e.preventDefault(
 const header=$('header');
 let suppressClickUntil=0;
 // Captura dentro do painel para reconhecer elementos do Shadow DOM fechado.
-function startPanelDrag(e){const path=e.composedPath();if(e.button!==0)return;if(layout.mini){if(path.includes($('.expand-mini')))return;}else if(!path.includes(header)||path.some(el=>el?.tagName==='BUTTON'))return;const r=root.querySelector('section').getBoundingClientRect();drag={startX:e.clientX,startY:e.clientY,dx:e.clientX-r.left,dy:e.clientY-r.top,moved:false};header.style.cursor='grabbing';if(!layout.mini)e.preventDefault();e.stopPropagation();}
+function startPanelDrag(e){if(standalone)return;const path=e.composedPath();if(e.button!==0)return;if(layout.mini){if(path.includes($('.expand-mini')))return;}else if(!path.includes(header)||path.some(el=>el?.tagName==='BUTTON'))return;const r=root.querySelector('section').getBoundingClientRect();drag={startX:e.clientX,startY:e.clientY,dx:e.clientX-r.left,dy:e.clientY-r.top,moved:false};header.style.cursor='grabbing';if(!layout.mini)e.preventDefault();e.stopPropagation();}
 function movePanelDrag(e){if(!drag)return;if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>4)drag.moved=true;if(!drag.moved)return;place(e.clientX-drag.dx,e.clientY-drag.dy);e.preventDefault();e.stopPropagation();}
 function finishDrag(){if(!drag)return;if(drag.moved){suppressClickUntil=Date.now()+700;saveLayout();}drag=null;header.style.cursor='grab';}
 root.addEventListener('mousedown',startPanelDrag,true);
@@ -96,7 +101,7 @@ const {progress,renderStatusGoal,updateGoalNotice}=CompanionPanelProgress.create
 function fishing(){workspace.innerHTML='<h3>Pronto para a próxima captura</h3><div class="tile equipment-card"><div class="metric"><span>Vara equipada</span><span>Consultar no inventário</span></div><div class="metric"><span>Isca</span><span>Consultar no inventário</span></div><div class="metric"><span>Anzol</span><span>Consultar no inventário</span></div></div>';renderEquipment();loadProfile(false).then(()=>{if(currentView==='pesca')renderEquipment();});}
 function statusView(){workspace.innerHTML='<div class="status-dashboard"><div class="tile home-overview"><div class="status-balances"><div class="metric"><span>Twishcoins</span><b class="home-coins"></b></div><div class="metric"><span>Pérolas</span><b class="home-pearls"></b></div><div class="metric"><span>Escamas</span><b class="home-scales"></b></div></div><div class="status-inventory"><div><span>Peixes no inventário</span><div class="muted">Venda direta disponível</div></div><b><span class="home-inventory"></span> <small>twishcoins</small></b></div></div><div class="tile status-goal"><div class="muted">Minha próxima conquista</div><div class="metric"><b class="status-goal-name"></b><span class="status-goal-ratio"></span></div><progress class="status-goal-bar" value="0" max="100" aria-label="Progresso da meta"></progress><div class="muted status-goal-message"></div><div class="status-rod-trade muted" hidden></div></div><div class="tile boat-information"><div class="muted info-label">Evento do barco</div><div class="event-data"></div><div class="goal-notice" hidden></div><div class="expedition-summary"></div></div></div>';renderHomeOverview();renderStatusGoal();renderEvent();updateGoalNotice();updateExpeditions();}
 async function loadProfile(show=true,refresh=false){const revision=uiRevision;try{const data=await api({type:'siteQuery',page:'profile',refresh});profileData=data.profile;renderHomeOverview();items=data.fish||[];snapshotAt=data.at;directSaleTotal=data.directSaleTotal??null;if(show&&revision===uiRevision)showProfile(refresh);return profileData;}catch(e){note(e.message);return null;}}
-function renderTodayOverview(){const box=root.querySelector('.today-overview');if(!box)return;for(const key of ['casts','fish','misses'])box.querySelector('.home-'+key).textContent=lastToday?.[key]==null?'—':fmt(lastToday[key]);}
+function renderTodayOverview(){const box=root.querySelector('.today-overview');if(!box)return;for(const key of ['casts','fish','misses'])box.querySelector('.home-'+key).textContent=lastToday?.[key]==null?'—':fmt(lastToday[key]);const rate=box.querySelector('.home-success');if(rate){const casts=lastToday?.casts,fish=lastToday?.fish;rate.textContent=Number.isFinite(casts)&&Number.isFinite(fish)&&casts>0?(fish/casts*100).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%':'—';}}
 function renderHomeOverview(){const box=root.querySelector('.home-overview');if(!box)return;const values={coins:profileData?.coins??shopBalances.coins,pearls:profileData?.pearls??shopBalances.pearls,scales:shopBalances.scales,inventory:directSaleTotal};for(const [key,value] of Object.entries(values))box.querySelector('.home-'+key).textContent=value===null||value===undefined?'—':fmt(value);}
 function currentRod(){return state.liveRod||profileData?.equipment?.find(e=>/^vara\b/i.test(e.name||''))?.name||null;}
 function renderEquipment(){const tile=workspace.querySelector('.equipment-card');if(!tile||!profileData)return;tile.querySelectorAll('.metric').forEach(e=>e.remove());for(const eq of [...profileData.equipment].reverse()){const row=document.createElement('div');row.className='metric';row.innerHTML=`<span>${esc(eq.name||'Indisponível')}</span>${eq.image?`<img class="equipment-art" src="${esc(eq.image)}" alt="">`:eq.icon?`<span class="equipment-empty-icon" aria-hidden="true">${esc(eq.icon)}</span>`:''}`;tile.prepend(row);}headerRead(profileData.at);}
@@ -108,7 +113,7 @@ chrome.storage.onChanged.addListener((changes,area)=>{const data=changes[scopedK
 chrome.storage.onChanged.addListener((changes,area)=>{if(area!=='local'||!changes[scopedKey('companionProfile')])return;profileData=changes[scopedKey('companionProfile')].newValue||null;headerRead(profileData?.at);if(currentView==='pesca'&&workspace.querySelector('.equipment-card'))renderEquipment();renderStatusGoal();updateGoalNotice();updateExpeditions();if(currentView==='progresso'&&workspace.querySelector('.balance')){const input=workspace.querySelector('.balance');input.value=profileData?.coins??'';input.dispatchEvent(new Event('input'));}});
 chrome.storage.onChanged.addListener((changes,area)=>{const key=scopedKey('companionSiteProtected');if(area==='local'&&changes[key]){protectedNames=new Set(changes[key].newValue||[]);for(const name of protectedNames)selected.delete(name);if(currentView==='inventario'&&workspace.querySelector('.search')){const search=workspace.querySelector('.search').value;drawInventory();workspace.querySelector('.search').value=search;workspace.querySelector('.search').oninput();}}});
 
-chrome.storage.onChanged.addListener((changes,area)=>{if(area==='local'&&changes[scopedKey('companionToday')]){lastToday=changes[scopedKey('companionToday')].newValue||lastToday;renderTodayOverview();renderHomeOverview();if(workspace.querySelector('.goal-overview'))workspace.querySelector('.balance')?.dispatchEvent(new Event('input'));}});
+chrome.storage.onChanged.addListener((changes,area)=>{if(area==='local'&&changes[scopedKey('companionToday')]){lastToday=changes[scopedKey('companionToday')].newValue||lastToday;const notice=workspace.querySelector('.notice');if(notice?.textContent?.startsWith('Resposta do resumo não encontrada'))notice.remove();renderTodayOverview();renderHomeOverview();if(workspace.querySelector('.goal-overview'))workspace.querySelector('.balance')?.dispatchEvent(new Event('input'));}});
 
 
 setInterval(()=>{if(state.enabled&&!invalid)extensionCall(()=>chrome.runtime.sendMessage({type:'monitorHealth'}));},5000);

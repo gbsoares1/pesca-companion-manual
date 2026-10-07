@@ -1,4 +1,4 @@
-(()=>{'use strict';if(globalThis.companionTwitchActive)return;globalThis.companionTwitchActive=true;let view=null,todayWatch=null,fishWatch=null;
+(()=>{'use strict';if(globalThis.companionTwitchActive)return;globalThis.companionTwitchActive=true;const scriptVersion=chrome.runtime.getManifest?.().version||null;let view=null,todayWatch=null,fishWatch=null;
 function restoreView(){if(!view)return;for(const [el,x,y] of view.positions)if(el.isConnected){el.scrollLeft=x;el.scrollTop=y;}window.scrollTo(view.x,view.y);view=null;}
 
 function editor(){const inputs=[...document.querySelectorAll('[data-a-target="chat-input"]')].filter(e=>e.getClientRects().length);return inputs.length===1?inputs[0]:null;}
@@ -7,21 +7,21 @@ if(sender.id!==chrome.runtime.id||!/^\/(?:[a-z0-9_]+|popout\/[a-z0-9_]+\/chat)\/
  if(m.type==='armToday'){
  todayWatch?.resolve?.({today:null});todayWatch?.observer.disconnect();if(todayWatch?.timer)clearTimeout(todayWatch.timer);
  const seen=new WeakSet([...document.querySelectorAll('[data-a-target="chat-line-message"]')]);const watch={value:null,observer:null,timer:null,resolve:null,user:m.user||''};
- watch.observer=new MutationObserver(()=>{for(const row of document.querySelectorAll('[data-a-target="chat-line-message"]')){if(seen.has(row))continue;const author=row.getAttribute('data-a-user')||row.querySelector('[data-a-target="chat-message-username"]')?.textContent||row.querySelector('[data-a-user]')?.getAttribute('data-a-user')||'';if(author.trim().toLowerCase().replace(/:$/,'')!=='twishgamebot')continue;const text=row.querySelector('[data-a-target="chat-line-message-body"]')?.textContent||row.textContent||'';const data=CompanionReplies.today(text,watch.user);if(data){watch.value={...data,at:Date.now()};watch.observer.disconnect();clearTimeout(watch.timer);watch.resolve?.({today:watch.value});watch.resolve=null;return;}}});
+ watch.scan=()=>{for(const row of document.querySelectorAll('[data-a-target="chat-line-message"]')){if(seen.has(row))continue;const author=row.getAttribute('data-a-user')||row.querySelector('[data-a-target="chat-message-username"]')?.textContent||row.querySelector('[data-a-user]')?.getAttribute('data-a-user')||'';if(author.trim().toLowerCase().replace(/:$/,'')!=='twishgamebot')continue;const text=row.querySelector('[data-a-target="chat-line-message-body"]')?.textContent||row.textContent||'';const data=CompanionReplies.today(text,watch.user);if(data){watch.value={...data,at:Date.now()};watch.observer.disconnect();clearTimeout(watch.timer);watch.resolve?.({today:watch.value});watch.resolve=null;return;}}};watch.observer=new MutationObserver(watch.scan);
  watch.observer.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['data-a-user','data-a-target']});watch.timer=setTimeout(()=>{watch.observer.disconnect();watch.resolve?.({today:null});watch.resolve=null;},15000);todayWatch=watch;reply({armed:true});return;
 }
 if(m.type==='awaitTodayResult'){if(!todayWatch||todayWatch.value){reply({today:todayWatch?.value||null});return;}todayWatch.resolve=reply;return true;}
-if(m.type==='todayResult'){reply({today:todayWatch?.value||null});return;}
+if(m.type==='todayResult'){todayWatch?.scan?.();reply({today:todayWatch?.value||null});return;}
 if(m.type==='cancelToday'){todayWatch?.observer.disconnect();if(todayWatch?.timer)clearTimeout(todayWatch.timer);todayWatch?.resolve?.({today:null});todayWatch=null;reply({ok:true});return;}
 if(m.type==='armFish'){
  fishWatch?.observer.disconnect();if(fishWatch?.timer)clearTimeout(fishWatch.timer);fishWatch?.resolve?.({fish:null});
  const seen=new WeakSet([...document.querySelectorAll('[data-a-target="chat-line-message"]')]);const watch={value:null,observer:null,timer:null,resolve:null,commandSeen:false,user:m.user||''};
- watch.observer=new MutationObserver(()=>{for(const row of document.querySelectorAll('[data-a-target="chat-line-message"]')){if(seen.has(row))continue;const author=row.getAttribute('data-a-user')||row.querySelector('[data-a-target="chat-message-username"]')?.textContent||row.querySelector('[data-a-user]')?.getAttribute('data-a-user')||'';const text=row.querySelector('[data-a-target="chat-line-message-body"]')?.textContent||row.textContent||'';const who=author.trim().toLowerCase().replace(/:$/,'');if(who===watch.user.toLowerCase().replace(/^@/,'')&&/\$pescar\b/i.test(text)){watch.commandSeen=true;seen.add(row);continue;}if(!watch.commandSeen){if(who==='twishgamebot'&&CompanionReplies.fish(text,watch.user))seen.add(row);continue;}if(who!=='twishgamebot')continue;const data=CompanionReplies.fish(text,watch.user);if(data){watch.value={...data,at:Date.now()};watch.observer.disconnect();clearTimeout(watch.timer);watch.resolve?.({fish:watch.value});watch.resolve=null;return;}}});
+ watch.scan=()=>{for(const row of document.querySelectorAll('[data-a-target="chat-line-message"]')){if(seen.has(row))continue;const author=row.getAttribute('data-a-user')||row.querySelector('[data-a-target="chat-message-username"]')?.textContent||row.querySelector('[data-a-user]')?.getAttribute('data-a-user')||'';const text=row.querySelector('[data-a-target="chat-line-message-body"]')?.textContent||row.textContent||'';const who=author.trim().toLowerCase().replace(/:$/,'');if(who===watch.user.toLowerCase().replace(/^@/,'')&&/\$pescar\b/i.test(text)){watch.commandSeen=true;seen.add(row);continue;}if(!watch.commandSeen){if(who==='twishgamebot'&&CompanionReplies.fish(text,watch.user))seen.add(row);continue;}if(who!=='twishgamebot')continue;const data=CompanionReplies.fish(text,watch.user);if(data){watch.value={...data,at:Date.now()};watch.observer.disconnect();clearTimeout(watch.timer);watch.resolve?.({fish:watch.value});watch.resolve=null;return;}}};watch.observer=new MutationObserver(watch.scan);
  watch.observer.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['data-a-user','data-a-target']});watch.timer=setTimeout(()=>{watch.observer.disconnect();watch.resolve?.({fish:null});watch.resolve=null;},15000);fishWatch=watch;reply({armed:true});return;
 }
 // Responde diretamente à mutação do chat, sem consultar por temporizadores da aba inativa.
 if(m.type==='awaitFishResult'){if(!fishWatch||fishWatch.value){reply({fish:fishWatch?.value||null});return;}fishWatch.resolve=reply;return true;}
-if(m.type==='fishResult'){reply({fish:fishWatch?.value||null});return;}
+if(m.type==='fishResult'){fishWatch?.scan?.();reply({fish:fishWatch?.value||null});return;}
 if(m.type==='cancelFish'){fishWatch?.observer.disconnect();if(fishWatch?.timer)clearTimeout(fishWatch.timer);fishWatch?.resolve?.({fish:null});fishWatch=null;reply({ok:true});return;}
 if(m.type==='chatBottom'){view=null;const lines=[...document.querySelectorAll('[data-a-target="chat-line-message"]')];let area=lines.at(-1)?.parentElement;while(area&&area!==document.body){if(area.scrollHeight>area.clientHeight&&['auto','scroll'].includes(getComputedStyle(area).overflowY)){area.scrollTop=area.scrollHeight;break;}area=area.parentElement;}reply({ok:true});return;}
 const input=editor();
@@ -40,10 +40,12 @@ if(m.type==='submitNative'){
  if(!input||text!==m.command||!navigator.onLine||document.querySelector('iframe[src*="captcha"],iframe[src*="arkoselabs"]')){reply({error:'Texto ou chat indisponível para envio.'});return;}
  const button=buttons.length===1?buttons[0]:null;
  if(!button||button.disabled||button.getAttribute('aria-disabled')==='true'){reply({error:'O botão de envio da Twitch está indisponível. Confira o chat.'});return;}
- const r=button.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,top=document.elementFromPoint(x,y);if(r.width<=0||r.height<=0||!Number.isFinite(x)||!Number.isFinite(y)||(top!==button&&!button.contains(top))){reply({error:'O botão Chat está coberto ou fora da área disponível.'});return;}button.click();reply({clicked:true});return;
+ const r=button.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,top=document.elementFromPoint(x,y);if(r.width<=0||r.height<=0||!Number.isFinite(x)||!Number.isFinite(y)||(top!==button&&!button.contains(top))){reply({error:'O botão Chat está coberto ou fora da área disponível.'});return;}// O envio confirmado pelo botão libera a resposta mesmo sem eco do comando no chat.
+ if(m.command==='$pescar'&&fishWatch)fishWatch.commandSeen=true;
+ button.click();reply({clicked:true});return;
 }
 if(m.type==='restoreView'){restoreView();reply({ok:true});return;}
-if(m.type==='probe'){reply({ready:!!input});return;}
+if(m.type==='probe'){reply({ready:!!input,version:scriptVersion,streamReady:!!globalThis.companionChatStream});return;}
 if(m.type==='prepareNative'){
 if(!input||!navigator.onLine||!input.getClientRects().length){reply({error:'Chat indisponível.'});return;}
 if(document.querySelector('iframe[src*="captcha"],iframe[src*="arkoselabs"]')){reply({error:'Resolva a verificação manualmente.'});return;}

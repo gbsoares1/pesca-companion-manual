@@ -1,5 +1,103 @@
 # Histórico de versões
 
+## 2.8.61
+
+- Mostra o aviso de peixe em destaque e o bônus em twishcoins quando presentes na resposta da captura.
+
+## 2.8.60
+
+- Resultado da pesca permanece visível até a próxima tentativa, sem desaparecer após 12 segundos.
+- Leitura contínua ignora respostas anteriores ao comando atual para não associar falha antiga à nova captura.
+- Testes com aracu em destaque e bônus, outra conta, falha antiga e exibição após 30 segundos.
+
+
+## 2.8.59
+
+- Leitura direta do chat próprio durante a espera da pesca e do Hoje, além do observador de mensagens.
+- Consulta de resposta a cada 250 ms por até 15 segundos, cancelada ao receber o resultado; não reenvia comandos.
+- Captura recebida pela leitura direta também atualiza o estado compartilhado do painel.
+- Testes da pesca e do Hoje a partir da janela independente e leitura sem callback do observador.
+
+
+## 2.8.58
+
+- Janela independente para mover o painel entre monitores, pelo botão ↗ ou pelo ícone da extensão.
+- Reutiliza as mesmas telas, dados, ações e abas exclusivas do produto.
+- Abrir novamente foca a janela existente; fechar restaura o painel da Twitch sem desligar o monitor.
+- Testes de abertura simultânea, reabertura, fechamento e ações a partir da página da extensão.
+
+
+## 2.8.57
+
+- Verifica a versão carregada pelo script do chat próprio e a presença do leitor contínuo.
+- Recarrega somente o chat exclusivo se o script estiver antigo, ausente ou invalidado após atualizar a extensão.
+- O envio aguarda o leitor da versão atual estar pronto.
+- Teste de atualização de 2.8.56 para 2.8.57 sem recargas repetidas.
+
+
+## 2.8.56
+
+- Bloco Hoje inclui Taxa de sucesso, calculada como peixes / lançadas, com uma casa decimal.
+- Recalcula junto com os totais recebidos do chat; sem lançadas ou sem dados, apresenta um traço.
+
+
+## 2.8.55
+
+- Resumo Hoje atualizado pela leitura contínua do chat exclusivo, inclusive para respostas tardias.
+- A resposta do resumo resolve a espera do botão sem aguardar a fila de comandos.
+- Aviso antigo de resumo não encontrado removido quando chegam os novos totais.
+- Testes com 26 lançadas, 19 peixes e 7 sem captura; rejeita resumo de outra aba.
+
+
+## 2.8.54
+
+- Sem captura reconhecida, mostra sempre Não foi desta vez pescador, inclusive ao encerrar a espera sem resposta.
+- Remove o aviso de resultado não confirmado do bloco da pesca.
+- Mantém captura reconhecida e mensagem exibida por 12 segundos.
+
+
+## 2.8.53
+
+- Remove a lista de frases específicas de pesca sem captura.
+- Resposta completa à pesca sem peixe apresenta Não foi desta vez pescador; captura parcial aguarda o texto completo.
+- Respostas concluídas são tratadas na mutação do chat próprio, sem timer em segundo plano.
+- Testes com a resposta da alga, frase inédita, nome destacado, captura parcial e sucesso.
+
+
+## 2.8.52
+
+- Reconhece imediatamente a resposta sentiu ... antes da fisgada como pesca sem captura.
+- Testa o texto reportado com menção destacada e corpo renderizado em partes, sem depender de temporizador na aba inativa.
+
+
+## 2.8.51
+
+- Desativação fecha ambas as abas próprias mesmo com registro de leitura ausente ou navegação alterada.
+- Ativação posterior cria novas abas exclusivas.
+- Preserva a identificação das abas próprias após reiniciar o navegador.
+- Teste do ciclo ativar, desativar e reativar preservando abas pessoais.
+
+
+## 2.8.50
+
+- Leitura contínua das respostas após $pescar da conta configurada, exclusivamente no chat próprio do produto.
+- Nome destacado e corpo separados reconhecidos; captura mostra o peixe e demais resultados mostram Não foi desta vez pescador.
+- Respostas não aguardam a fila de comandos e leituras antigas não substituem o cooldown atual.
+- Fim da Maré Turbo consulta novamente o cooldown oficial; abas próprias mantêm o endereço configurado.
+- Aviso da captura permanece por 12 segundos.
+
+
+## 2.8.49
+
+- Leitura da captura liberada no clique oficial de envio, sem depender do eco de $pescar no chat.
+- Teste com a resposta de acará sem exibição do comando enviado.
+
+## 2.8.48
+
+- Início de Maré Turbo com anúncio de reset recarrega a aba própria do inventário uma vez por evento para obter o cooldown oficial.
+- Registro persistido evita recargas repetidas durante o mesmo evento.
+- Testes para evento de reset, leitura seguinte, nova ocorrência e eventos sem reset.
+
 ## 2.8.47
 
 - Observa também alterações nos atributos de autor e corpo da mensagem no chat.
