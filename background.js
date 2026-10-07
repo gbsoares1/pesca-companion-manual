@@ -182,7 +182,7 @@ if(m.type==='command'){
  const tab=await readyChat();
   if(text==='$hoje')await chrome.tabs.sendMessage(tab.id,{type:'armToday',user});
  const result=await sendNative(tab.id,text);let today=null;
- if(text==='$hoje'){if(result.attempted&&!result.retry){for(let i=0;i<24;i++){const data=await chrome.tabs.sendMessage(tab.id,{type:'todayResult'});today=data?.today;if(today)break;await new Promise(r=>setTimeout(r,500));}}await chrome.tabs.sendMessage(tab.id,{type:'cancelToday'});}
+ if(text==='$hoje'){if(result.attempted&&!result.retry){const data=await chrome.tabs.sendMessage(tab.id,{type:'awaitTodayResult'});today=data?.today||null;}await chrome.tabs.sendMessage(tab.id,{type:'cancelToday'});}
  if(today)await chrome.storage.local.set({[boatKey('companionToday')]:today});
  s.result=result.message;await save();reply({ok:true,message:result.message,today,sent:result.sent===true});
  if(result.sent&&/^\$(?:vender|comprar|isca|da|di|desequiparanzol|desequiparisca|wl|wlr|whitelist|whitelistremove|autovenda|titulo)(?: |$)/.test(text)&&s.monitorTabId!==undefined){await new Promise(r=>setTimeout(r,1500));try{await saveSnapshot(await freshSnapshot(s.monitorTabId));}catch{}}return;

@@ -2,7 +2,7 @@
 
 ![Ícone do Pesca Companion](icons/icon128.png)
 
-**Versão 2.8.44 · extensão para Google Chrome · interface em português**
+**Versão 2.8.47 · extensão para Google Chrome · interface em português**
 
 **Créditos: [@MadtraxBR](https://www.twitch.tv/madtraxbr)**
 

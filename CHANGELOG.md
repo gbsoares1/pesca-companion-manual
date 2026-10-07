@@ -1,5 +1,24 @@
 # Histórico de versões
 
+## 2.8.47
+
+- Observa também alterações nos atributos de autor e corpo da mensagem no chat.
+- Teste com autor carregado depois do texto e captura de acará no formato observado na Twitch.
+- Cabeçalho mostra Aguardando resposta durante o envio, em vez de Disponível.
+
+## 2.8.46
+
+- Resumo Hoje lê também mensagens sem o seletor antigo de corpo do chat e normaliza espaços invisíveis.
+- Resposta do Hoje é entregue diretamente pela observação do chat, sem consultas periódicas.
+- Comando de pesca renderizado em partes não é descartado antes de ficar completo.
+- Testes de resumo parcial, novos totais, timeout e comando parcial de pesca.
+
+## 2.8.45
+
+- Status lista todas as expedições liberadas para a vara equipada, com maré e orientação por destino.
+- Troca de vara inicia nova consulta sem aguardar o intervalo da consulta anterior.
+- Respostas de uma consulta iniciada com outra vara são descartadas pelo painel.
+
 ## 2.8.44
 
 - Tutorial de instalação com voz em português, legendas e capturas reais do GitHub, Chrome e painel, acessível pelo README e guia de instalação.

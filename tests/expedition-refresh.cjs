@@ -1,0 +1,13 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const panel=fs.readFileSync(require('node:path').join(__dirname,'../panel.js'),'utf8');
+const start=panel.indexOf('async function refreshExpeditions('),end=panel.indexOf('chrome.storage.onChanged',start);
+let rod='Vara de Carbono',resolveQuery,requests=[];
+const summary={innerHTML:''};
+const ctx={Date,String,CompanionExpeditions:{day:()=> 'today',advice:()=>({stars:2,text:'Maré pouco favorável.'})},$:q=>q==='.expedition-summary'?summary:null,currentRod:()=>rod,state:{enabled:true,at:Date.now(),boat:'barco',user:'pescador'},currentView:'status',expeditionData:{day:'today',rod,seas:[{name:'Baía',accessible:true}]},expeditionBusy:false,expeditionAttemptAt:Date.now(),expeditionAttemptRod:rod,expeditionMarkup:'',esc:String,api:msg=>{requests.push(msg);return new Promise(resolve=>{resolveQuery=resolve;});},note:()=>{}};
+vm.createContext(ctx);vm.runInContext(panel.slice(start,end),ctx);
+rod='Vara Encantada';ctx.updateExpeditions();assert.equal(requests.length,1,'Troca de vara consulta imediatamente apesar da tentativa recente');assert.doesNotMatch(summary.innerHTML,/<b>Baía/,'Não mostra destinos da vara antiga');
+resolveQuery({day:'today',rod,seas:[{name:'Baía das Lendas',accessible:true,tide:'Águas Turvas'},{name:'Mar das Sereias',accessible:true,tide:'Maré Cheia'},{name:'Abismo',accessible:false}]});
+(async()=>{await new Promise(setImmediate);assert.match(summary.innerHTML,/Baía das Lendas/);assert.match(summary.innerHTML,/Mar das Sereias/);assert.doesNotMatch(summary.innerHTML,/<b>Abismo/);assert.match(summary.innerHTML,/Vara Encantada/);
+const pending=ctx.refreshExpeditions(true);rod='Vara Abissal';resolveQuery({day:'today',rod:'Vara Encantada',seas:[]});await pending;assert.equal(requests.length,3,'Troca durante consulta inicia uma leitura para a vara atual');assert.notEqual(ctx.expeditionData.rod,rod,'Resposta antiga não é rotulada com a nova vara');assert.doesNotMatch(summary.innerHTML,/Mar das Sereias/);
+resolveQuery({day:'today',rod,seas:[{name:'Abismo',accessible:true}]});await new Promise(setImmediate);assert.match(summary.innerHTML,/<b>Abismo/);console.log('Expedições: todos os destinos liberados no Status, troca de vara imediata e resposta antiga descartada.');})();
