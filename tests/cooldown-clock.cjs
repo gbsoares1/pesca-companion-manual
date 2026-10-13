@@ -1,0 +1,11 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');
+const ctx={Date,Number};vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(__dirname,'../core.js'),'utf8'),ctx);
+const clock=ctx.TwishReminderCore.cooldownClock();
+assert.equal(clock(120,1000),121000);
+assert.equal(clock(120,61000),121000,'DOM parado não prolonga cooldown');
+assert.equal(clock(119,62000),121000,'Timer lento não prolonga cooldown');
+assert.equal(clock(0,63000),63000,'Zero oficial reseta imediatamente');
+assert.equal(clock(270,64000),334000,'Nova pesca estabelece novo prazo');
+assert.equal(clock(null,65000),null,'Erro não vira disponível');
+assert.equal(clock(16,66000),82000);
+console.log('Cooldown: relógio absoluto, DOM parado, timer lento, reset, nova pesca e erro.');

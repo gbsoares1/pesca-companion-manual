@@ -1,5 +1,32 @@
 # Histórico de versões
 
+## 2.8.65
+
+- Corrige a troca de streamer pela Twish com o monitor ligado, inclusive na guia exclusiva ativa.
+- Redireciona as guias exclusivas e limpa cooldown, captura e evento do streamer anterior.
+- Mantém os dados salvos separados por streamer e conta; abas inativas não alteram o vínculo.
+
+## 2.8.64
+
+- Inventário ordenado da maior raridade para a menor, com ordem alfabética entre peixes da mesma raridade. A busca mantém essa ordenação.
+
+## 2.8.63
+
+- Contagem regressiva usa horário de término, sem prolongar o cooldown quando o timer da guia em segundo plano fica parado ou lento.
+- Mudanças no inventário são lidas por observador, além da leitura periódica e da consulta de saúde.
+- Mensagens do TwishGameBot sobre duelo da conta e resets gerais provocam nova leitura do inventário exclusivo em segundo plano, sem ativar abas.
+- Confirma o estado oficial ao terminar a estimativa; o botão só libera com zero lido na Twish.
+- Confere o inventário a cada 30 segundos como recuperação para alterações sem mensagem reconhecida no chat.
+- Zero confirmado na mesma página libera o botão após a proteção contra clique duplicado.
+
+## 2.8.62
+
+- Corrige o resumo Hoje para reconhecer tanto “vazios” quanto “vacilos” nas respostas do TwishGameBot.
+- Aceita resumo atualizado em linha reaproveitada pela Twitch, preservando o descarte do histórico anterior.
+- Um canal de resposta encerrado sem dados não interrompe os outros canais de leitura do Hoje.
+- Após enviar $hoje, mantém o chat exclusivo nas mensagens recentes para acompanhar a resposta.
+- Testes de regressão com os dois formatos, outra conta, mensagem incompleta, linha reaproveitada e falha de um canal.
+
 ## 2.8.61
 
 - Mostra o aviso de peixe em destaque e o bônus em twishcoins quando presentes na resposta da captura.

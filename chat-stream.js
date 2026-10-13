@@ -15,6 +15,11 @@ function scan(){
  for(const [index,row] of currentRows.entries()){
   const data=read(row),signature=JSON.stringify(data);if(seen.get(row)===signature)continue;
   if(data.author==='twishgamebot'){
+   const own=new RegExp('@'+state.user.replace(/^@/,'')+'(?![a-z0-9_])','i').test(data.text);
+   const globalReset=/todo mundo|todos|geral/i.test(data.text)&&/resetad|resetou|zerad|zerou/i.test(data.text);
+   if(globalReset||(own&&/duelo|resetad|resetou|zerad|zerou|cooldown/i.test(data.text))){
+    seen.set(row,signature);chrome.runtime.sendMessage({type:'cooldownHint',user:state.user,observedAt:Date.now()}).catch(()=>{});continue;
+   }
    const today=CompanionReplies.today(data.text,state.user);
    if(today){seen.set(row,signature);chrome.runtime.sendMessage({type:'todayOutcome',user:state.user,text:data.text,observedAt:Date.now()}).catch(()=>{});continue;}
   }

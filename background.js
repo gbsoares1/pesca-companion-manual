@@ -37,7 +37,7 @@ async function saveSnapshot(data){await syncProtection(data.fish||[]);const patc
 async function sendNative(tabId,text='$pescar'){
  let attempted=false;
  const check=async()=>{const {companionOwnedChatTab:owned}=await chrome.storage.session.get('companionOwnedChatTab');const tab=await chrome.tabs.get(tabId);if(owned!==tabId||!isOwnedChatUrl(tab.url,boat))throw Error('A aba própria do chat mudou. Operação interrompida.');};
- try{await check();const editor=await chrome.tabs.sendMessage(tabId,{type:'prepareNative',command:text});if(editor.error)throw Error(editor.error);const focused=await chrome.tabs.sendMessage(tabId,{type:'focusEditor'});if(focused.error||!focused.focused)throw Error(focused.error||'O campo do chat não recebeu foco.');await check();const inserted=await chrome.tabs.sendMessage(tabId,{type:'insertChatCommand',command:text});if(inserted?.error||!inserted?.hasCommand)throw Error(inserted?.error||'O comando não foi confirmado no campo.');await new Promise(r=>setTimeout(r,250));await check();const submitted=await chrome.tabs.sendMessage(tabId,{type:'submitNative',command:text});attempted=!!submitted?.clicked;if(submitted?.error||!attempted)throw Error(submitted?.error||'O chat não confirmou o clique.');let cleared=false;for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,250));const status=await chrome.tabs.sendMessage(tabId,{type:'nativeStatus',command:text});if(status?.cleared===true){cleared=true;break;}}return {attempted,sent:cleared,retry:!cleared,message:cleared?'Mensagem enviada. Aguardando a resposta do bot.':'A Twitch não confirmou o envio. Confira o chat antes de tentar novamente.'};}catch(e){return {attempted,sent:false,retry:attempted,message:e.message||'Falha no envio.'};}finally{try{await chrome.tabs.sendMessage(tabId,{type:text==='$pescar'&&attempted?'chatBottom':'restoreView'});}catch{}}
+ try{await check();const editor=await chrome.tabs.sendMessage(tabId,{type:'prepareNative',command:text});if(editor.error)throw Error(editor.error);const focused=await chrome.tabs.sendMessage(tabId,{type:'focusEditor'});if(focused.error||!focused.focused)throw Error(focused.error||'O campo do chat não recebeu foco.');await check();const inserted=await chrome.tabs.sendMessage(tabId,{type:'insertChatCommand',command:text});if(inserted?.error||!inserted?.hasCommand)throw Error(inserted?.error||'O comando não foi confirmado no campo.');await new Promise(r=>setTimeout(r,250));await check();const submitted=await chrome.tabs.sendMessage(tabId,{type:'submitNative',command:text});attempted=!!submitted?.clicked;if(submitted?.error||!attempted)throw Error(submitted?.error||'O chat não confirmou o clique.');let cleared=false;for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,250));const status=await chrome.tabs.sendMessage(tabId,{type:'nativeStatus',command:text});if(status?.cleared===true){cleared=true;break;}}return {attempted,sent:cleared,retry:!cleared,message:cleared?'Mensagem enviada. Aguardando a resposta do bot.':'A Twitch não confirmou o envio. Confira o chat antes de tentar novamente.'};}catch(e){return {attempted,sent:false,retry:attempted,message:e.message||'Falha no envio.'};}finally{try{await chrome.tabs.sendMessage(tabId,{type:['$pescar','$hoje'].includes(text)&&attempted?'chatBottom':'restoreView'});}catch{}}
 }
 let pendingFishResult=null,pendingTodayResult=null;
 let queue=Promise.resolve(),monitorOperation=null,chatOperation=null,referenceNavigation=false;
@@ -101,14 +101,15 @@ function ensureMonitor(refresh=false){
   const current=await chrome.tabs.get(tab.id);
   if(current.status==='loading')return;
   if(current.url===INVENTORY){
-   let alive=false;try{alive=(await chrome.tabs.sendMessage(tab.id,{type:'readerPing'}))?.alive===true;}catch{}
+   let alive=false;try{const probe=await chrome.tabs.sendMessage(tab.id,{type:'readerPing'});alive=probe?.alive===true;if(probe?.version&&probe.version!==chrome.runtime.getManifest().version){await chrome.tabs.reload(tab.id);return;}}catch{}
+   if(alive&&Number.isFinite(latest?.cooldownUntil)&&((latest.cooldownUntil<=Date.now()&&latest.seconds>0)||Date.now()-(latest.readerPageStartedAt||Date.now())>=30000)){await chrome.tabs.reload(tab.id);return;}
    if(!alive)await chrome.scripting.executeScript({target:{tabId:tab.id},files:['site-data.js','core.js','reader.js']});
   }
 
  })().catch(async(error)=>{const {fishState:s}=await chrome.storage.local.get('fishState');if(s){s.monitorError=error?.message||'Não foi possível iniciar o monitor. Abra o inventário fixo e confira o login.';await chrome.storage.local.set({fishState:s});}}).finally(()=>{monitorOperation=null;});return monitorOperation;
 }
 chrome.tabs.onRemoved.addListener(async id=>{const {fishState:s}=await chrome.storage.local.get('fishState');if(!s?.enabled)return;const owned=await chrome.storage.session.get(['companionOwnedMonitorTab','companionOwnedChatTab']);if(owned.companionOwnedMonitorTab===id)ensureMonitor();if(owned.companionOwnedChatTab===id)ensureChat();});
-chrome.tabs.onUpdated.addListener(async(id,change)=>{if(!change.url)return;const {companionOwnedChatTab:chat}=await chrome.storage.session.get('companionOwnedChatTab');const {fishState:s}=await chrome.storage.local.get('fishState');if(s?.enabled&&chat===id&&!isOwnedChatUrl(change.url,s.boat||DEFAULT_BOAT))await ensureChat();const expected=s?.user?'https://twish.com.br/c/'+(s.boat||DEFAULT_BOAT)+'/'+s.user+'/inventory':null;if(!referenceNavigation&&s?.enabled&&s.monitorTabId===id&&change.url!==expected)ensureMonitor();});
+chrome.tabs.onUpdated.addListener(async(id,change)=>{if(!change.url)return;const {companionOwnedChatTab:chat}=await chrome.storage.session.get('companionOwnedChatTab');const {fishState:s}=await chrome.storage.local.get('fishState');if(s?.enabled&&chat===id&&!isOwnedChatUrl(change.url,s.boat||DEFAULT_BOAT))await ensureChat();const expected=s?.user?'https://twish.com.br/c/'+(s.boat||DEFAULT_BOAT)+'/'+s.user+'/inventory':null;if(s?.enabled&&s.monitorTabId===id&&change.url!==expected){const tab=await chrome.tabs.get(id);if(tab.active&&contextFromTwish(change.url)){referenceNavigation=false;handleMessage({type:'selectBoat'},{url:change.url,tab},()=>{});}else if(!referenceNavigation)ensureMonitor();}});
 chrome.runtime.onStartup.addListener(async()=>{await ensureMonitor(true);});
 function handleMessage(m,sender,reply){
 const standalone=sender.id===chrome.runtime.id&&sender.url===chrome.runtime.getURL?.('panel-window.html');
@@ -139,18 +140,17 @@ if(m.type==='chatOutcome'){
   reply({ok:true});
  })().catch(()=>reply({ok:false}));return true;
 }
-if(!['toggle','reading','fish','monitorHealth','openMonitor','command','snapshot','inspectFish','siteQuery','openOfficial','setProtection','selectBoat'].includes(m.type))return;
+if(!['toggle','reading','fish','monitorHealth','openMonitor','command','snapshot','inspectFish','siteQuery','openOfficial','setProtection','selectBoat','cooldownHint'].includes(m.type))return;
 const originalReply=reply;let replied=false;reply=value=>{if(!replied){replied=true;originalReply(value);}};
 const job=async()=>{
 let {fishState:s={enabled:false,seconds:null,used:false}}=await chrome.storage.local.get('fishState');
 await restoreOwnedTab('companionOwnedMonitorTab');await restoreOwnedTab('companionOwnedChatTab');setContext({boat:s.boat||DEFAULT_BOAT,user:s.user||null});s.boat=boat;s.user=user;
 const migrationKey='companionBoatMigration';const migration=await chrome.storage.local.get(migrationKey);if(!migration[migrationKey]){const keys=['companionProfile','companionGoal','companionToday','companionSiteProtected','companionShopBalances'];const old=await chrome.storage.local.get(keys);const legacyUser=user||'madtraxbr';const mapped={};for(const key of keys){const target='boat:'+DEFAULT_BOAT+':'+legacyUser+':'+key;const existing=await chrome.storage.local.get(target);if(old[key]!==undefined&&existing[target]===undefined)mapped[target]=old[key];}await chrome.storage.local.set({...mapped,[migrationKey]:true});}
 if(m.type==='selectBoat'){
- const tab=await chrome.tabs.get(sender.tab.id);const detected={...(contextFromTwish(tab.url)||{}),...(m.context||{})};const nextBoat=detected.boat||boat;const nextUser=normalizeUser(detected.user)??user;
+ const tab=await chrome.tabs.get(sender.tab.id);const official=contextFromTwish(tab.url);if(!official){reply({ok:false});return;}const detected={...official,user:official.user||normalizeUser(m.context?.user)};const nextBoat=detected.boat||boat;const nextUser=normalizeUser(detected.user)??user;
  const {companionOwnedMonitorTab:owned}=await chrome.storage.session.get('companionOwnedMonitorTab');
- const {companionOwnedChatTab:chat}=await chrome.storage.session.get('companionOwnedChatTab');if(!nextBoat||!tab.active||sender.tab.id===owned||sender.tab.id===chat){reply({ok:false});return;}
- if(s.enabled&&user&&(nextBoat!==boat||nextUser!==user)){reply({ok:false,contextLocked:true,boat,user});return;}
- if(nextBoat!==boat||nextUser!==user){s={...s,enabled:!!s.enabled,boat:nextBoat,user:nextUser,monitorTabId:s.monitorTabId,seconds:null,used:false,at:0};setContext({boat:nextBoat,user:nextUser});await chrome.storage.local.set({fishState:s});if(s.enabled&&user)await ensureMonitor(true);}
+ const {companionOwnedChatTab:chat}=await chrome.storage.session.get('companionOwnedChatTab');if(!nextBoat||!tab.active||sender.tab.id===chat){reply({ok:false});return;}
+ if(nextBoat!==boat||nextUser!==user){s={...s,enabled:!!s.enabled,boat:nextBoat,user:nextUser,monitorTabId:s.monitorTabId,seconds:null,cooldownUntil:null,used:false,at:0,readerPageStartedAt:0,lastAttempt:0,lastCommand:0,lastCooldownHint:0,catchResult:null,event:null,cooldownResetEvent:null,liveRod:null,result:null,error:null};setContext({boat:nextBoat,user:nextUser});await chrome.storage.local.set({fishState:s});if(s.enabled&&user)await ensureMonitor(true);}
  reply({ok:true,boat,user});return;
 }
 if(m.boat&&m.boat!==boat)throw Error('O barco mudou. Revise a ação no barco atual.');
@@ -232,10 +232,17 @@ if(m.type==='command'){
   let todayResponse=null,streamTodayResponse=null;
   if(text==='$hoje'){await chrome.tabs.sendMessage(tab.id,{type:'armToday',user});todayResponse=chrome.tabs.sendMessage(tab.id,{type:'awaitTodayResult'}).then(data=>data?.today||null).catch(()=>null);streamTodayResponse=new Promise(resolve=>{pendingTodayResult=resolve;});}
  const result=await sendNative(tab.id,text);let today=null;
- if(text==='$hoje'){if(result.attempted&&!result.retry){const poll=pollChatResult(tab.id,'todayResult','today');try{today=await Promise.race([todayResponse,streamTodayResponse,poll.promise]);}finally{poll.cancel();}}pendingTodayResult=null;await chrome.tabs.sendMessage(tab.id,{type:'cancelToday'});}
+ // Um canal encerrado sem dados não pode cancelar os demais; o poll limita a espera.
+ if(text==='$hoje'){if(result.attempted&&!result.retry){const poll=pollChatResult(tab.id,'todayResult','today');try{today=await Promise.race([todayResponse.then(value=>value||new Promise(()=>{})),streamTodayResponse.then(value=>value||new Promise(()=>{})),poll.promise]);}finally{poll.cancel();}}pendingTodayResult=null;await chrome.tabs.sendMessage(tab.id,{type:'cancelToday'});}
  if(today)await chrome.storage.local.set({[boatKey('companionToday')]:today});
  s.result=result.message;await save();reply({ok:true,message:result.message,today,sent:result.sent===true});
  if(result.sent&&/^\$(?:vender|comprar|isca|da|di|desequiparanzol|desequiparisca|wl|wlr|whitelist|whitelistremove|autovenda|titulo)(?: |$)/.test(text)&&s.monitorTabId!==undefined){await new Promise(r=>setTimeout(r,1500));try{await saveSnapshot(await freshSnapshot(s.monitorTabId));}catch{}}return;
+}
+if(m.type==='cooldownHint'){
+ const chatId=await restoreOwnedTab('companionOwnedChatTab');
+ if(!s.enabled||sender.tab?.id!==chatId||!isOwnedChatUrl(sender.url,s.boat)||normalizeUser(m.user)!==user||!Number.isFinite(m.observedAt)||Math.abs(Date.now()-m.observedAt)>30000)return;
+ if(Date.now()-(s.lastCooldownHint||0)<5000)return;
+ s.lastCooldownHint=Date.now();await save();await ensureMonitor(true);return;
 }
 if(m.type==='monitorHealth'||m.type==='openMonitor'){
  if(s.enabled)await ensureChat();
@@ -275,11 +282,11 @@ const turboEnded='event' in m&&/mar[eé] turbo/i.test(s.event?.text||'')&&(!m.ev
 const refreshResetCooldown=!m.error&&(needsEventCooldownRefresh(s,m.event)||turboEnded);
 if(refreshResetCooldown)s.cooldownResetEvent=m.event?{text:m.event.text,until:Date.now()+m.event.seconds*1000+30000}:null;
 if('event' in m)s.event=m.event&&typeof m.event.text==='string'?{text:m.event.text.slice(0,2000),seconds:Number.isFinite(m.event.seconds)&&m.event.seconds>=0?m.event.seconds:null,at:Date.now()}:null;
-s.at=Date.now();s.seconds=m.seconds;s.error=m.error||null;s.monitorError=null;
-if(m.seconds>0||(m.seconds===0&&Number.isFinite(m.pageStartedAt)&&m.pageStartedAt>(s.lastAttempt||0)&&Date.now()-(s.lastAttempt||0)>=15000)){s.used=false;s.result=null;}if(m.error)s.result=null;
+s.at=Date.now();s.cooldownUntil=Number.isFinite(m.cooldownUntil)?m.cooldownUntil:m.seconds===null?null:s.at+m.seconds*1000;s.seconds=m.seconds;s.error=m.error||null;s.monitorError=null;
+if(m.seconds>0||(m.seconds===0&&Date.now()-(s.lastAttempt||0)>=15000)){s.used=false;s.result=null;}if(m.error)s.result=null;
 await save();if(refreshResetCooldown&&s.monitorTabId!==undefined){try{await chrome.tabs.reload(s.monitorTabId);}catch{delete s.cooldownResetEvent;await save();}}return;}
 if(Date.now()-(s.lastAttempt||0)<15000)return;
-if(!TEST_SEND&&(!s.enabled||Date.now()-(s.at||0)>5000||s.seconds!==0||s.used||s.error))return;
+if(!TEST_SEND&&(!s.enabled||Date.now()-(s.at||0)>15000||s.seconds!==0||s.used||s.error))return;
 s.catchResult=null;s.used=true;s.lastAttempt=Date.now();s.result=null;await save();
 try{
 const tab=await readyChat();

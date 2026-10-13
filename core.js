@@ -13,5 +13,17 @@
     if (['0','pronto','disponível','pode pescar','pesca disponível','pesca disponível!'].includes(s)) return 0;
     return null;
   }
-  root.TwishReminderCore = {seconds};
+  // O DOM pode ficar parado ou diminuir lentamente em uma aba em segundo plano.
+  function cooldownClock() {
+    let previous=null,until=null;
+    return (value,now=Date.now())=>{
+      if(!Number.isFinite(value)){previous=null;until=null;return null;}
+      if(value===0)until=now;
+      else if(previous===null||value>previous+2)until=now+value*1000;
+      else until=Math.min(until,now+value*1000);
+      previous=value;
+      return until;
+    };
+  }
+  root.TwishReminderCore = {seconds,cooldownClock};
 })(globalThis);

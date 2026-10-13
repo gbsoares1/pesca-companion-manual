@@ -8,3 +8,7 @@ ctx.state.catchResult={caught:true,name:'aracu',featured:true,bonus:'50'};ctx.re
 ctx.state.catchResult={caught:false,at:now-60000};ctx.render();assert.equal(get('.catch-notice').hidden,false);assert.equal(get('.catch-notice').innerHTML,'Não foi desta vez pescador.');
 ctx.state.catchResult=null;ctx.sending=true;ctx.render();assert.equal(get('.catch-notice').hidden,true,'Próxima pesca limpa resultado anterior');assert.equal(get('.fish-label').textContent,'Aguardando resposta');
 console.log('Exibição real do painel: aracu e falha persistem; próxima pesca limpa resultado.');
+
+ctx.sending=false;ctx.state.seconds=120;ctx.state.cooldownUntil=now+16000;ctx.render();assert.equal(get('.time').textContent,'0:16','Tempo mostrado usa prazo absoluto, não DOM atrasado');
+ctx.state.cooldownUntil=now-1000;ctx.render();assert.equal(get('.time').textContent,'Confirmando…');assert.equal(get('.fish').disabled,true,'Estimativa vencida aguarda confirmação do site');
+ctx.state.seconds=0;ctx.state.used=false;ctx.render();assert.equal(get('.time').textContent,'Disponível');assert.equal(get('.fish').disabled,false,'Zero confirmado libera botão');

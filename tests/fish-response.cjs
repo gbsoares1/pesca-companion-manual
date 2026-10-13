@@ -65,3 +65,18 @@ send({type:'armFish',user:'madtraxbr'});send({type:'submitNative',command:'$pesc
 console.log('Aracu em destaque: bônus preserva reconhecimento de sucesso da conta correta.');
 
 assert.equal(replies.fish(featured,'madtraxbr').featured,true);assert.equal(replies.fish(featured,'madtraxbr').bonus,'50');assert.equal(replies.fish('@madtraxbr pescou um piau de 1kg','madtraxbr').featured,undefined);
+
+// Formato real alternativo: o bot também chama tentativas sem captura de vazios.
+const realToday='[🌟 Mecenas dos Mares: @madtraxbr] hoje você teve: 42 lançadas 🎣 | 28 peixes 🐟 | 14 vazios ❌';
+assert.deepEqual(replies.today(realToday,'madtraxbr'),{casts:42,fish:28,misses:14});
+assert.equal(replies.today(realToday,'madtraxbr_extra'),null);
+assert.equal(replies.today(realToday.replace('14 vazios',''),'madtraxbr'),null);
+// Twitch pode reaproveitar uma linha que existia quando a consulta começou.
+const reused=row('TwishGameBot',realToday);rows.push(reused);
+send({type:'armToday',user:'madtraxbr'});let reusedResult;send({type:'awaitTodayResult'},r=>reusedResult=r);
+observer.fn();assert.equal(reusedResult,undefined,'Não reutiliza resumo antigo');
+reused.textContent=realToday.replace('42 lançadas','43 lançadas');observer.fn();
+assert.equal(reusedResult.today.casts,43);assert.equal(reusedResult.today.misses,14);
+console.log('Hoje: vazios e vacilos aceitos, outra conta e texto incompleto rejeitados, linha reaproveitada atualiza totais.');
+
+assert.deepEqual(replies.today('[🌟 Mecenas dos Mares: @madtraxbr] hoje você teve: 159 lançadas 🎣 | 97 peixes 🐟 | 62 vacilos ❌','madtraxbr'),{casts:159,fish:97,misses:62});
